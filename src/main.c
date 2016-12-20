@@ -1,10 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "buffer/buffer.c"
+#include "poison_pill.c"
+#include "list/list.c"
 #include "provider.c"
 #include "accepter.c"
-#include "dispatcher.c"
 #include "reader.c"
-#include <pthread.h>
+#include "dispatcher.c"
+#include "readerTest.c"
+#include "providerTest.c"
+#include "accepterTest.c"
+#include "dispatcherTest.c"
 
 
 int main(void) {
@@ -31,12 +37,11 @@ int main(void) {
 
 	pthread_create(&provThread,NULL,provider_run_thread,&provArgs);
 	pthread_create(&accThread,NULL,accepter_run,accepter);
-	printf("\n1\n");
 
 	//invio le richieste per i reader
-	send_request(accepter->buffer,1);
 	send_request(accepter->buffer,2);
 	send_request(accepter->buffer,3);
+	send_request(accepter->buffer,4);
 
 	sleep(1);
 	//terminato il provider, termino l'accepter
@@ -68,6 +73,7 @@ int main(void) {
 	}
 	printf("\nREADER LIST: %d 0\n",size(readerList));
 
+	list_destroy(readerList);
 
 }
 

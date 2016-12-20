@@ -9,10 +9,11 @@ accepter_t *accepter_init(int bufferSize,list_t *list) {
 }
 
 void accepter_destroy(accepter_t *accepter){
-	buffer_destroy(accepter->buffer);
+	//buffer_destroy(accepter->buffer); //TODO: altro destroy
 	free(accepter); //la lista non la distruggo
 }
 
+// aggiungo un reader alla lista dei reader e lo lancio in esecuzione
 reader_t *add_reader(msg_t *request,accepter_t *accepter) {
 	pthread_t readThread;
 	int procTime = request->content;
@@ -26,6 +27,7 @@ reader_t *add_reader(msg_t *request,accepter_t *accepter) {
 	return reader;
 }
 
+// funzione principale di un accepter
 void accepter_run(accepter_t *accepter) {
 	buffer_t *accepterBuffer = accepter->buffer;
 	msg_t *request = get_bloccante(accepterBuffer);
@@ -38,6 +40,7 @@ void accepter_run(accepter_t *accepter) {
 	accepter_destroy(accepter);
 }
 
+// invio una richiesta nel buffer dell'accepter
 msg_t *send_request(buffer_t *bufferAccepter,int procTime) {
 	msg_t *msg = msg_init_int(procTime);
 	put_bloccante(bufferAccepter,msg);

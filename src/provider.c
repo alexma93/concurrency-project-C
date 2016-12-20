@@ -1,5 +1,4 @@
 #include "provider.h"
-#include "poison_pill.h"
 
 
 msg_t *send_msg(provider_t *provider, msg_t *msg) {
@@ -18,11 +17,12 @@ provider_t *provider_init(int dimBuffer) {
 	return p;
 }
 
-void provider_destroy(provider_t *provider) {//TODO: vedere quando chiamarla
+void provider_destroy(provider_t *provider) {
 	buffer_destroy(provider->buffer);
 	free(provider);
 }
 
+// invia una sequenza di messaggi
 void send_sequence(provider_t *provider, msg_t **messages,int quantity) {
 	for (int i=0;i<quantity;i++)
 		send_msg(provider,messages[i]);
@@ -31,9 +31,10 @@ void send_sequence(provider_t *provider, msg_t **messages,int quantity) {
 
 void provider_run(provider_t *provider, msg_t **messages,int quantity) {
 	send_sequence(provider,messages,quantity);
-	//provider_destroy(provider); //TODO:
+	//provider_destroy(provider); //TODO: distruggere il provider
 }
 
+// funzione di supporto usata per la creazione di un thread di un provider
 void provider_run_thread(void *argp) {
 	provider_args *args = argp;
 	provider_run(args->provider,args->messages,args->quantity);

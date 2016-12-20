@@ -2,9 +2,11 @@
 #define READER_H_
 
 #include "buffer/buffer.h"
-#include "list/list.c"
+#include "list/list.h"
+#include "poison_pill.h"
 
-/*const */int DIM_BUFFER_READER = 4; // TODO:va segnato da qualche parte
+
+int DIM_BUFFER_READER = 4;
 
 typedef struct reader_t {
 	buffer_t *buffer;

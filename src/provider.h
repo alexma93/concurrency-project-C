@@ -2,11 +2,12 @@
 #define PROVIDER_H_
 
 
-#include "buffer/buffer.c"
+#include "buffer/buffer.h"
+#include "poison_pill.h"
 
+//si poteva evitare la struct, ma pensavo che avrei aggiunto altre caratteristiche al provider oltre al buffer
 typedef struct provider_t {
 	buffer_t *buffer;
-	//devo aggiungerci altro
 } provider_t;
 
 typedef struct {
@@ -15,7 +16,7 @@ typedef struct {
 	int quantity;
 } provider_args;
 
-//il provider deve inviare una sequenza finita
+
 msg_t *send_msg(provider_t *provider, msg_t *msg);
 msg_t *send_poison_pill(provider_t *provider);
 provider_t *provider_init(int dimBuffer);

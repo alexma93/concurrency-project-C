@@ -12,7 +12,7 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-#include "testList.c"
+#include "testList.h"
 
 int main(int argc, char** argv){
 

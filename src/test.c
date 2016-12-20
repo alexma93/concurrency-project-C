@@ -1,5 +1,9 @@
 #include "CUnit/Basic.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "buffer/buffer.c"
+#include "poison_pill.c"
+#include "list/list.c"
 #include "provider.c"
 #include "accepter.c"
 #include "reader.c"
@@ -8,7 +12,6 @@
 #include "providerTest.c"
 #include "accepterTest.c"
 #include "dispatcherTest.c"
-
 
 
 /************* Test case functions ****************/
@@ -42,7 +45,7 @@ int main ( void )
    }
 
    /* add the tests to the suite */
-   if ( (NULL == CU_add_test(providerSuite, "invio_2_messaggi", invio_2_messaggi))
+   if ( (NULL == CU_add_test(providerSuite, "invio_1_messaggio", invio_1_messaggio))
 		|| (NULL == CU_add_test(providerSuite, "invio_sequenza_messaggi", invio_sequenza_messaggi))
 		|| (NULL == CU_add_test(readerSuite, "leggi_messaggio", leggi_messaggio))
 		|| (NULL == CU_add_test(readerSuite, "leggi_poison_pill", leggi_poison_pill))
@@ -52,9 +55,11 @@ int main ( void )
 		|| (NULL == CU_add_test(accepterSuite, "accepter_multiple_requests", accepter_multiple_requests))
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatcher_e_provider_buffer_grande", dispatcher_e_provider_buffer_grande))
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatcher_e_provider_buffer_piccolo", dispatcher_e_provider_buffer_piccolo))
-		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_messaggi_buffer_grandi", dispatch_messaggi_buffer_grandi))
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_messaggi_buffer_grandi_semplice", dispatch_messaggi_buffer_grandi_semplice))
+		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_messaggi_buffer_grandi", dispatch_messaggi_buffer_grandi))
+		|| (NULL == CU_add_test(dispatcherSuite, "dispatcher_un_reader_buffer_piccolo", dispatcher_un_reader_buffer_piccolo))
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_messaggi_buffer_piccoli", dispatch_messaggi_buffer_piccoli))
+		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_poison_pill", dispatch_poison_pill))
 
 		)
    {

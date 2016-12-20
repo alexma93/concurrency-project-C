@@ -11,7 +11,7 @@
 #include <CUnit/CUnit.h>
 #include <stdlib.h>
 
-#include "listDomainAssertion.c"
+#include "listDomainAssertion.h"
 #include "list.h"
 
 typedef struct {
