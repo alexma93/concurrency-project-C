@@ -102,7 +102,7 @@ int main(void) {
 	printf("\tREADER LIST: %d ; valore atteso = 1\n",size(readerList));
 
 	printf("\nMOSTRO CHE IL DISPATCHER ELIMINA I READER LENTI:");
-	printf("\nCREO UN ALTRO PROVIDER, CHE INVIA 4 MESSAGGI AL DISPATCHER\n");
+	printf("\nCREO UN ALTRO PROVIDER CHE INVIA 4 MESSAGGI AL DISPATCHER,\n");
 	provider_t *provider2 = provider_init(providerBufferSize);
 	msg_t *providerMessages2[4];
 	providerMessages2[0] = msg_init_string("MESSAGGIO 1");
