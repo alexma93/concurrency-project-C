@@ -1,6 +1,8 @@
 #include "CUnit/Basic.h"
 #include <stdio.h>
 #include <stdlib.h>
+//includo i .c poiche' gli ultimi giorni ho avuto problemi col linker
+#include "buffer/msg.c"
 #include "buffer/buffer.c"
 #include "poison_pill.c"
 #include "list/list.c"
@@ -49,7 +51,7 @@ int main ( void )
 		|| (NULL == CU_add_test(providerSuite, "invio_sequenza_messaggi", invio_sequenza_messaggi))
 		|| (NULL == CU_add_test(readerSuite, "leggi_messaggio", leggi_messaggio))
 		|| (NULL == CU_add_test(readerSuite, "leggi_poison_pill", leggi_poison_pill))
-		//|| (NULL == CU_add_test(readerSuite, "leggi_messaggio_lista_bloccata", leggi_messaggio_lista_bloccata))
+		|| (NULL == CU_add_test(readerSuite, "leggi_messaggio_lista_bloccata", leggi_messaggio_lista_bloccata))
 		|| (NULL == CU_add_test(accepterSuite, "accepter_add_reader", accepter_add_reader))
 		|| (NULL == CU_add_test(accepterSuite, "accepter_concurrent_add_reader", accepter_concurrent_add_reader))
 		|| (NULL == CU_add_test(accepterSuite, "accepter_multiple_requests", accepter_multiple_requests))
@@ -60,7 +62,7 @@ int main ( void )
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatcher_un_reader_buffer_piccolo", dispatcher_un_reader_buffer_piccolo))
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_messaggi_buffer_piccoli", dispatch_messaggi_buffer_piccoli))
 		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_poison_pill", dispatch_poison_pill))
-
+		|| (NULL == CU_add_test(dispatcherSuite, "dispatch_aggiunto_un_altro_reader", dispatch_aggiunto_un_altro_reader))
 		)
    {
       CU_cleanup_registry();

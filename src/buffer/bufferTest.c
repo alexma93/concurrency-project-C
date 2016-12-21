@@ -1,6 +1,6 @@
 #include "CUnit/Basic.h"
 #include <stdio.h>
-#include "buffer.c"
+#include "buffer.h"
 
 
 

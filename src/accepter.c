@@ -1,16 +1,18 @@
 #include "accepter.h"
 
-accepter_t *accepter_init(int bufferSize,list_t *list) {
+accepter_t *accepter_init(int bufferSize,list_t *list,pthread_mutex_t *mutex) {
 	accepter_t *accepter = (accepter_t *) malloc(sizeof(accepter_t));
 	accepter->buffer = buffer_init(bufferSize);
+	pthread_mutex_lock(mutex);
 	accepter->readerList = list;
-	pthread_mutex_init(&(accepter->listMutex),NULL);
+	pthread_mutex_unlock(mutex);
+	accepter->listMutex = mutex;
 	return accepter;
 }
 
 void accepter_destroy(accepter_t *accepter){
-	//buffer_destroy(accepter->buffer); //TODO: altro destroy
-	free(accepter); //la lista non la distruggo
+	buffer_destroy(accepter->buffer);
+	free(accepter);
 }
 
 // aggiungo un reader alla lista dei reader e lo lancio in esecuzione
@@ -19,10 +21,10 @@ reader_t *add_reader(msg_t *request,accepter_t *accepter) {
 	int procTime = request->content;
 	request->msg_destroy(request);
 
-	pthread_mutex_lock(&(accepter->listMutex));
-	reader_t *reader = reader_init(procTime,accepter->readerList,&(accepter->listMutex));
+	pthread_mutex_lock(accepter->listMutex);
+	reader_t *reader = reader_init(procTime,accepter->readerList,accepter->listMutex);
 	addElement(accepter->readerList,reader);
-	pthread_mutex_unlock(&(accepter->listMutex));
+	pthread_mutex_unlock(accepter->listMutex);
 	pthread_create(&readThread,NULL,reader_run,reader);
 	return reader;
 }
@@ -37,7 +39,6 @@ void accepter_run(accepter_t *accepter) {
 	}
 
 	request->msg_destroy(request);
-	accepter_destroy(accepter);
 }
 
 // invio una richiesta nel buffer dell'accepter

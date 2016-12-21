@@ -10,6 +10,7 @@ typedef struct provider_t {
 	buffer_t *buffer;
 } provider_t;
 
+//usata come argomento di pthread_create
 typedef struct {
 	provider_t *provider;
 	msg_t **messages;

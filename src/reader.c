@@ -15,17 +15,26 @@ void reader_destroy(reader_t *reader) {
 }
 
 msg_t *read_msg(reader_t *reader) {
-	msg_t * m = get_non_bloccante(reader->buffer);
-	//sleep(reader->proc_time);
+	msg_t * m = get_bloccante(reader->buffer);
+	sleep(reader->proc_time);
 	return m;
 }
 
 void reader_run(reader_t *reader) {
 	msg_t *m = NULL;
-	while (m!=POISON_PILL)
+	while (m!=POISON_PILL) {
+		if (m!=NULL)
+			m->msg_destroy(m);
 		m = read_msg(reader);
+	}
 	pthread_mutex_lock(reader->listMutex);
 	removeElement(reader->list,reader);
 	pthread_mutex_unlock(reader->listMutex);
 	reader_destroy(reader);
 }
+
+
+
+
+
+

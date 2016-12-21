@@ -6,9 +6,8 @@ msg_t *send_msg(provider_t *provider, msg_t *msg) {
 }
 
 msg_t *send_poison_pill(provider_t *provider) {
-	msg_t *poison_pill = msg_init_pill(NULL);
-	put_bloccante(provider->buffer,&POISON_PILL_MSG);
-	return poison_pill;
+	put_bloccante(provider->buffer,POISON_PILL);
+	return POISON_PILL;
 }
 
 provider_t *provider_init(int dimBuffer) {
@@ -31,7 +30,6 @@ void send_sequence(provider_t *provider, msg_t **messages,int quantity) {
 
 void provider_run(provider_t *provider, msg_t **messages,int quantity) {
 	send_sequence(provider,messages,quantity);
-	//provider_destroy(provider); //TODO: distruggere il provider
 }
 
 // funzione di supporto usata per la creazione di un thread di un provider

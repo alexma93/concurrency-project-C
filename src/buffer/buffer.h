@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "msg.c"
+#include "msg.h"
 
 typedef struct buffer_t {
 	int insertion;

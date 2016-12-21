@@ -1,3 +1,6 @@
+#include "provider.h"
+#include "CUnit/Basic.h"
+
 
 /*qui e' testato il provider singolarmente,
  * in dispatcherTest assieme al dispatcher */
@@ -11,7 +14,7 @@ void invio_1_messaggio(void) {
 
 	CU_ASSERT_EQUAL(provider->buffer->occupied,2);
 	CU_ASSERT_STRING_EQUAL(provider->buffer->cells[0].content,"MESSAGGIO 1");
-	CU_ASSERT_EQUAL(provider->buffer->cells[2].content,NULL); //c'e' una poison pill
+	CU_ASSERT_EQUAL(provider->buffer->cells[1].content,NULL); //c'e' una poison pill
 
 	provider_destroy(provider);
 	msg1->msg_destroy(msg1);
@@ -24,7 +27,11 @@ void invio_sequenza_messaggi(void) {
 	for(int i=0;i<3;i++)
 		messages[i] = msg_init_string("MESSAGGIO");
 	send_sequence(provider,messages,3);
+
 	CU_ASSERT_EQUAL(provider->buffer->occupied,4);
-	CU_ASSERT_STRING_EQUAL(provider->buffer->cells[1].content,"MESSAGGIO");
+
+	provider_destroy(provider);
+	for(int i=0;i<3;i++)
+		messages[i]->msg_destroy(messages[i]);
 }
 

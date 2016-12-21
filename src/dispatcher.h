@@ -16,10 +16,5 @@ void remove_slow_readers(list_t *listReader,list_t *slowReaders);
 int send_to_reader(reader_t *reader,msg_t *m);
 void dispatch_run(buffer_t *buffer,list_t *listReader,pthread_mutex_t *listMutex);
 void dispatch_run_thread(void *argp);
-void dispatch_run_simple(buffer_t *buffer,list_t *listReader);
-void send_to_reader_simple(reader_t *reader,msg_t *m);
-
-
-
 
 #endif

@@ -1,8 +1,11 @@
-
+#include "accepter.h"
+#include "list/list.h"
+#include "CUnit/Basic.h"
 
 void accepter_add_reader(void) {
 	list_t * list = list_init();
-	accepter_t *accepter = accepter_init(2,list);
+	pthread_mutex_t listMutex = PTHREAD_MUTEX_INITIALIZER;
+	accepter_t *accepter = accepter_init(2,list,&listMutex);
 
 	send_request(accepter->buffer,1);
 
@@ -12,11 +15,16 @@ void accepter_add_reader(void) {
 	CU_ASSERT_EQUAL(size(list),1);
 	CU_ASSERT_EQUAL(reader->list,list);
 	CU_ASSERT_EQUAL(reader->proc_time,1);
+
+	list_destroy(list);
+	pthread_mutex_destroy(accepter->listMutex);
+	accepter_destroy(accepter);
 }
 
 //l'accepter e' in esecuzione e gli arriva una richiesta
 void accepter_concurrent_add_reader(void) {
-	accepter_t *accepter = accepter_init(2,list_init());
+	pthread_mutex_t listMutex =PTHREAD_MUTEX_INITIALIZER;
+	accepter_t *accepter = accepter_init(2,list_init(),&listMutex);
 	pthread_t *accThread;
 	pthread_create(&accThread,NULL,accepter_run,accepter);
 
@@ -26,6 +34,10 @@ void accepter_concurrent_add_reader(void) {
 
 	pthread_join(accThread,NULL);
 	CU_ASSERT_EQUAL(size(accepter->readerList),1);
+
+	list_destroy(accepter->readerList);
+	pthread_mutex_destroy(accepter->listMutex);
+	accepter_destroy(accepter);
 }
 
 struct request_args{accepter_t *accepter;int time;};
@@ -37,7 +49,8 @@ msg_t *send_request_thread(void *argp) {
 
 // arrivano piu' richieste contemporaneamente a un accepter in esecuzione
 void accepter_multiple_requests(void) {
-	accepter_t *accepter = accepter_init(5,list_init());
+	pthread_mutex_t listMutex = PTHREAD_MUTEX_INITIALIZER;
+	accepter_t *accepter = accepter_init(5,list_init(),&listMutex);
 	list_t *list = accepter->readerList;
 	pthread_t *accThread, request1, request2, request3;
 	struct request_args arg;
@@ -55,5 +68,16 @@ void accepter_multiple_requests(void) {
 	pthread_join(request3,NULL);
 	send_poison_pill(accepter);
 	pthread_join(accThread,NULL);
+
 	CU_ASSERT_EQUAL(size(list),3);
+
+
+	pthread_mutex_destroy(accepter->listMutex);
+	list_destroy(list);
+	accepter_destroy(accepter);
 }
+
+
+
+
+

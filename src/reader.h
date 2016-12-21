@@ -5,8 +5,8 @@
 #include "list/list.h"
 #include "poison_pill.h"
 
-
-int DIM_BUFFER_READER = 4;
+//dimensione nota e uguale per tutti del buffer. La cambio per alcuni test e nel main.
+int DIM_BUFFER_READER = 5;
 
 typedef struct reader_t {
 	buffer_t *buffer;
