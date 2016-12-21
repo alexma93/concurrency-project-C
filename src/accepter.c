@@ -20,9 +20,8 @@ reader_t *add_reader(msg_t *request,accepter_t *accepter) {
 	pthread_t readThread;
 	int procTime = request->content;
 	request->msg_destroy(request);
-
-	pthread_mutex_lock(accepter->listMutex);
 	reader_t *reader = reader_init(procTime,accepter->readerList,accepter->listMutex);
+	pthread_mutex_lock(accepter->listMutex);
 	addElement(accepter->readerList,reader);
 	pthread_mutex_unlock(accepter->listMutex);
 	pthread_create(&readThread,NULL,reader_run,reader);

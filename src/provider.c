@@ -21,15 +21,11 @@ void provider_destroy(provider_t *provider) {
 	free(provider);
 }
 
-// invia una sequenza di messaggi
-void send_sequence(provider_t *provider, msg_t **messages,int quantity) {
+// il provider invia una sequenza di messaggi terminante con la poison_pill
+void provider_run(provider_t *provider, msg_t **messages,int quantity) {
 	for (int i=0;i<quantity;i++)
 		send_msg(provider,messages[i]);
 	send_poison_pill(provider);
-}
-
-void provider_run(provider_t *provider, msg_t **messages,int quantity) {
-	send_sequence(provider,messages,quantity);
 }
 
 // funzione di supporto usata per la creazione di un thread di un provider

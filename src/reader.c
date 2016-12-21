@@ -4,7 +4,9 @@ reader_t *reader_init(int time,list_t *list,pthread_mutex_t *mutex) {
 	reader_t *r = (reader_t *) malloc(sizeof(reader_t));
 	r->buffer = buffer_init(DIM_BUFFER_READER);
 	r->proc_time = time;
+	pthread_mutex_lock(mutex);
 	r->list = list;
+	pthread_mutex_unlock(mutex);
 	r->listMutex = mutex;
 	return r;
 }

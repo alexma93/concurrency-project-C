@@ -20,15 +20,14 @@ void dispatcher_e_provider_buffer_grande(void) {
 	dispArgs.listReader = list_init();
 	dispArgs.listMutex = &mutex;
 	pthread_create(&dispatcher,NULL,dispatch_run_thread,&dispArgs);
-
-	send_sequence(provider,messages,3);
+	provider_run(provider,messages,3);
 	pthread_join(dispatcher,NULL);
 
 	CU_ASSERT_EQUAL(provider->buffer->occupied,0);
 
 	provider_destroy(provider);
 	for(int i=0;i<3;i++)
-			messages[i]->msg_destroy(messages[i]);
+		messages[i]->msg_destroy(messages[i]);
 	pthread_mutex_destroy(&mutex);
 }
 
@@ -49,14 +48,14 @@ void dispatcher_e_provider_buffer_piccolo(void) {
 	dispArgs.listMutex = &mutex;
 	pthread_create(&dispatcher,NULL,dispatch_run_thread,&dispArgs);
 
-	send_sequence(provider,messages,4);
+	provider_run(provider,messages,4);
 	pthread_join(dispatcher,NULL);
 
 	CU_ASSERT_EQUAL(provider->buffer->occupied,0);
 
 	provider_destroy(provider);
 	for(int i=0;i<4;i++)
-			messages[i]->msg_destroy(messages[i]);
+		messages[i]->msg_destroy(messages[i]);
 	pthread_mutex_destroy(&mutex);
 }
 
@@ -65,26 +64,30 @@ void send_to_reader_simple(reader_t *reader,msg_t *m) {
 	put_non_bloccante(reader->buffer,m);
 }
 //versione semplificata per i test
-void dispatch_run_simple(buffer_t *buffer,list_t *listReader) {
+void dispatch_run_simple(buffer_t *buffer,list_t *listReader,pthread_mutex_t *listMutex) {
 	iterator_t *iterator;
 	msg_t *msg = get_bloccante(buffer);
 	reader_t *reader;
 	while (msg!=POISON_PILL) {
-	    iterator = iterator_init(listReader);
-	    while(hasNext(iterator)) {
-	        reader = (reader_t*)next(iterator);
-	        send_to_reader_simple(reader,msg);
-	    }
-	    iterator_destroy(iterator);
-	    msg = get_bloccante(buffer);
+		pthread_mutex_lock(listMutex);
+		iterator = iterator_init(listReader);
+		while(hasNext(iterator)) {
+			reader = (reader_t*)next(iterator);
+			send_to_reader_simple(reader,msg);
+		}
+		iterator_destroy(iterator);
+		pthread_mutex_unlock(listMutex);
+		msg = get_bloccante(buffer);
 	}
 	//invio la poison_pill a tutti
+	pthread_mutex_lock(listMutex);
 	iterator = iterator_init(listReader);
 	while(hasNext(iterator)) {
 		reader = (reader_t*)next(iterator);
 		put_bloccante(reader->buffer,POISON_PILL);
 	}
 	iterator_destroy(iterator);
+	pthread_mutex_unlock(listMutex);
 }
 
 
@@ -109,19 +112,21 @@ void dispatch_messaggi_buffer_grandi_semplice(void) {
 	for(int i=0;i<3;i++)
 		add_reader(send_request(accepter->buffer,1),accepter);
 
-	dispatch_run_simple(provBuff,list);
+	dispatch_run_simple(provBuff,list,&listMutex);
 
+	pthread_mutex_lock(&listMutex);
 	iterator_t *iterator = iterator_init(list);
 	while(hasNext(iterator)) {
 		reader_t *reader = (reader_t*)next(iterator);
 		CU_ASSERT(reader->buffer->occupied >=3); //al piu' hanno letto un messaggio
 	}
 	iterator_destroy(iterator);
+	pthread_mutex_unlock(&listMutex);
 	CU_ASSERT_EQUAL(provBuff->occupied,0);
 
 	buffer_destroy(provBuff);
 	for(int i=0;i<3;i++)
-			messages[i]->msg_destroy(messages[i]);
+		messages[i]->msg_destroy(messages[i]);
 	pthread_mutex_destroy(&listMutex);
 }
 
@@ -147,17 +152,19 @@ void dispatch_messaggi_buffer_grandi(void) {
 
 	dispatch_run(provBuff,list,&listMutex);
 
+	pthread_mutex_lock(&listMutex);
 	iterator_t *iterator = iterator_init(list);
 	while(hasNext(iterator)) {
 		reader_t *reader = (reader_t*)next(iterator);
 		CU_ASSERT(reader->buffer->occupied >=3); //al piu' hanno letto un messaggio
 	}
 	iterator_destroy(iterator);
+	pthread_mutex_unlock(&listMutex);
 	CU_ASSERT_EQUAL(provBuff->occupied,0);
 
 	buffer_destroy(provBuff);
 	for(int i=0;i<3;i++)
-			messages[i]->msg_destroy(messages[i]);
+		messages[i]->msg_destroy(messages[i]);
 	pthread_mutex_destroy(&listMutex);
 }
 
@@ -181,7 +188,10 @@ void dispatcher_un_reader_buffer_piccolo(void) {
 	add_reader(send_request(accepter->buffer,1),accepter); // reader gia' in esecuzione
 
 	dispatch_run(provBuff,list,&listMutex);
+
+	pthread_mutex_lock(&listMutex);
 	CU_ASSERT_EQUAL(size(list),0); // ho rimosso il reader dalla lista perche' lento
+	pthread_mutex_unlock(&listMutex);
 
 	buffer_destroy(provBuff);
 	for(int i=0;i<3;i++)
@@ -211,11 +221,14 @@ void dispatch_messaggi_buffer_piccoli(void) {
 		add_reader(send_request(accepter->buffer,1),accepter); //3 reader gia' in esecuzione
 
 	dispatch_run(provBuff,list,&listMutex);
+
+	pthread_mutex_lock(&listMutex);
 	CU_ASSERT_EQUAL(size(list),0);
+	pthread_mutex_unlock(&listMutex);
 
 	buffer_destroy(provBuff);
 	for(int i=0;i<3;i++)
-			messages[i]->msg_destroy(messages[i]);
+		messages[i]->msg_destroy(messages[i]);
 	pthread_mutex_destroy(&listMutex);
 	accepter_destroy(accepter);
 }
@@ -236,9 +249,13 @@ void dispatch_poison_pill(void) {
 
 	dispatch_run(provBuff,list,&listMutex);
 
+	pthread_mutex_lock(&listMutex);
 	CU_ASSERT_EQUAL(size(list),3);
+	pthread_mutex_unlock(&listMutex);
 	sleep(2); //non ho i thread dei reader per fare join. Ma i reader "dovrebbero" terminare
+	pthread_mutex_lock(&listMutex);
 	CU_ASSERT_EQUAL(size(list),0);
+	pthread_mutex_unlock(&listMutex);
 
 	buffer_destroy(provBuff);
 	pthread_mutex_destroy(&listMutex);

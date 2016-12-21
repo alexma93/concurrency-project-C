@@ -47,12 +47,14 @@ void dispatch_run(buffer_t *buffer,list_t *listReader,pthread_mutex_t *listMutex
 	    msg = get_bloccante(buffer);
 	}
 	//invio la poison_pill a tutti
+	pthread_mutex_lock(listMutex);
 	iterator = iterator_init(listReader);
 	while(hasNext(iterator)) {
 		reader = (reader_t*)next(iterator);
 		put_bloccante(reader->buffer,POISON_PILL);
 	}
 	iterator_destroy(iterator);
+	pthread_mutex_unlock(listMutex);
 }
 
 void dispatch_run_thread(void *argp) {

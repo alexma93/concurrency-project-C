@@ -26,7 +26,7 @@ void invio_sequenza_messaggi(void) {
 	msg_t *messages[3];
 	for(int i=0;i<3;i++)
 		messages[i] = msg_init_string("MESSAGGIO");
-	send_sequence(provider,messages,3);
+	provider_run(provider,messages,3);
 
 	CU_ASSERT_EQUAL(provider->buffer->occupied,4);
 

@@ -58,12 +58,15 @@ int main(void) {
 	printf("\nLANCIO IL DISPATCHER\n");
 	dispatch_args dispArgs;
 	dispArgs.buffer = provider->buffer;
+	pthread_mutex_lock(&listMutex);
 	dispArgs.listReader = accepter->readerList;
+	pthread_mutex_unlock(&listMutex);
 	dispArgs.listMutex = &listMutex;
 	pthread_create(&dispatcher,NULL,dispatch_run_thread,&dispArgs);
 	sleep(1);
 
 	// stanno processando il primo messaggio
+	pthread_mutex_lock(&listMutex);
 	printf("\nI READER STANNO PROCESSANDO IL PRIMO MESSAGGIO");
 	printf("\nREADER LIST: %d ; valore atteso = 3\n",size(readerList));
 	iterator_t *it = iterator_init(readerList);
@@ -75,6 +78,7 @@ int main(void) {
 		i++;
 	}
 	iterator_destroy(it);
+	pthread_mutex_unlock(&listMutex);
 
 	printf("\n IL CONTENUTO DEL BUFFER DEL READER PIU LENTO(3) (null=poison pill):\n");
 	for(int i=reader->buffer->extraction;i<reader->buffer->insertion;i++)
@@ -91,15 +95,22 @@ int main(void) {
 	pthread_join(accThread,NULL);
 
 	printf("\nASPETTO CHE I PRIMI 2 READER LEGGANO I 3 MESSAGGI E LA POISON PILL\n");
+	pthread_mutex_lock(&listMutex);
 	printf("\tREADER LIST: %d ; valore atteso = 3\n",size(readerList));
+	pthread_mutex_unlock(&listMutex);
 	printf("\ndopo 8 secondi, finisce il primo: ");
 	printf("\n");
 	sleep(8);
+	pthread_mutex_lock(&listMutex);
 	printf("\tREADER LIST: %d ; valore atteso = 2\n",size(readerList));
+	pthread_mutex_unlock(&listMutex);
 	printf("\ndopo 12 secondi, finisce il secondo:  ");
 	printf("\n");
 	sleep(4);
+	pthread_mutex_lock(&listMutex);
 	printf("\tREADER LIST: %d ; valore atteso = 1\n",size(readerList));
+	pthread_mutex_unlock(&listMutex);
+
 
 	printf("\nMOSTRO CHE IL DISPATCHER ELIMINA I READER LENTI:");
 	printf("\nCREO UN ALTRO PROVIDER CHE INVIA 4 MESSAGGI AL DISPATCHER,\n");

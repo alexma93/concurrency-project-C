@@ -12,11 +12,12 @@ void accepter_add_reader(void) {
 	msg_t * request = get_bloccante(accepter->buffer);
 	reader_t *reader = add_reader(request,accepter);
 
+	pthread_mutex_lock(&listMutex);
 	CU_ASSERT_EQUAL(size(list),1);
 	CU_ASSERT_EQUAL(reader->list,list);
 	CU_ASSERT_EQUAL(reader->proc_time,1);
-
 	list_destroy(list);
+	pthread_mutex_unlock(&listMutex);
 	pthread_mutex_destroy(accepter->listMutex);
 	accepter_destroy(accepter);
 }
@@ -33,9 +34,11 @@ void accepter_concurrent_add_reader(void) {
 	send_request(accepter->buffer,2); //richiesta che non verra' evasa
 
 	pthread_join(accThread,NULL);
+	pthread_mutex_lock(&listMutex);
 	CU_ASSERT_EQUAL(size(accepter->readerList),1);
 
 	list_destroy(accepter->readerList);
+	pthread_mutex_unlock(&listMutex);
 	pthread_mutex_destroy(accepter->listMutex);
 	accepter_destroy(accepter);
 }
